@@ -22,6 +22,7 @@ type Product struct {
 // @Param product body Product true "Product data"
 // @Success 200 {string} string "Product saved successfully"
 // @Failure 400 {string} string "Invalid request payload"
+// @Failure 404 {string} string "User not found"
 // @Failure 500 {string} string "Internal server error"
 // @Router /products [post]
 func SaveProduct(db *sql.DB) fiber.Handler {
@@ -29,14 +30,32 @@ func SaveProduct(db *sql.DB) fiber.Handler {
 		// Parse the request body into a Product struct
 		var product Product
 		if err := c.BodyParser(&product); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, "Invalid request payload")
+		}
+
+		// Check if the UserID exists in the Users table
+		userStmt, err := db.Prepare("SELECT COUNT(*) FROM Users WHERE id = ?")
+		if err != nil {
 			return err
 		}
+		defer userStmt.Close()
+
+		var count int
+		err = userStmt.QueryRow(product.UserID).Scan(&count)
+		if err != nil {
+			return err
+		}
+		if count == 0 {
+			return fiber.NewError(fiber.StatusNotFound, "User not found")
+		}
+
 		// Convert the product images slice to a comma-separated string
 		productImagesStr := ""
 		for _, image := range product.ProductImages {
 			productImagesStr += image + ","
 		}
 		productImagesStr = productImagesStr[:len(productImagesStr)-1]
+
 		// Insert the product into the database
 		stmt, err := db.Prepare("INSERT INTO Products (product_name, product_description, product_images, product_price, created_at) VALUES (?, ?, ?, ?, NOW())")
 		if err != nil {
