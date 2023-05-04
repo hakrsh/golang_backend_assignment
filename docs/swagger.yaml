@@ -1,0 +1,48 @@
+definitions:
+  handlers.Product:
+    properties:
+      product_description:
+        type: string
+      product_images:
+        type: string
+      product_name:
+        type: string
+      product_price:
+        type: number
+      user_id:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /products:
+    post:
+      consumes:
+      - application/json
+      description: Save a product to the database
+      parameters:
+      - description: Product data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.Product'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product saved successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Save a product
+      tags:
+      - Products
+swagger: "2.0"
