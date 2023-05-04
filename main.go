@@ -32,13 +32,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Print(conn)
+	ch, err := conn.Channel()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer ch.Close()
 
 	// Create the Fiber app
 	app := fiber.New()
 
 	// Define the route to receive the product data
-	app.Post("/products", handlers.SaveProduct(db))
+	app.Post("/products", handlers.SaveProduct(db, ch))
 	app.Get("/swagger/*", swagger.HandlerDefault)
 	// Start the server
 	if err := app.Listen(":3000"); err != nil {

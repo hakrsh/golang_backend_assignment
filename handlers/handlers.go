@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/streadway/amqp"
 )
 
 type Product struct {
@@ -25,7 +27,7 @@ type Product struct {
 // @Failure 404 {string} string "User not found"
 // @Failure 500 {string} string "Internal server error"
 // @Router /products [post]
-func SaveProduct(db *sql.DB) fiber.Handler {
+func SaveProduct(db *sql.DB, ch *amqp.Channel) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// Parse the request body into a Product struct
 		var product Product
@@ -63,10 +65,45 @@ func SaveProduct(db *sql.DB) fiber.Handler {
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(product.ProductName, product.ProductDescription, productImagesStr, product.ProductPrice)
+		res, err := stmt.Exec(product.ProductName, product.ProductDescription, productImagesStr, product.ProductPrice)
 		if err != nil {
 			return err
 		}
+
+		// Get the product ID
+		productID, err := res.LastInsertId()
+		if err != nil {
+			return err
+		}
+		fmt.Println("Product ID:", productID)
+		_, err = ch.QueueDeclare(
+			"product_queue",
+			false,
+			false,
+			false,
+			false,
+			nil,
+		)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		err = ch.Publish(
+			"",
+			"product_queue",
+			false,
+			false,
+			amqp.Publishing{
+				ContentType: "text/plain",
+				Body:        []byte(fmt.Sprintf("%d", productID)),
+			},
+		)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println("Successfully Published Message to Queue")
 
 		// Return a success message
 		return c.SendString("Product saved successfully")
