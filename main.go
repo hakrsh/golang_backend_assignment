@@ -10,6 +10,7 @@ import (
 	"github.com/golang_backend_assignment/db"
 	_ "github.com/golang_backend_assignment/docs"
 	"github.com/golang_backend_assignment/handlers"
+	"github.com/golang_backend_assignment/msgqueue"
 	"github.com/joho/godotenv"
 )
 
@@ -24,6 +25,14 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
+
+	// Connect to the message queue
+	conn, err := msgqueue.NewRMQ()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Print(conn)
 
 	// Create the Fiber app
 	app := fiber.New()
