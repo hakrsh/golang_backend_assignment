@@ -79,7 +79,10 @@ var doc = `{
                     "type": "string"
                 },
                 "product_images": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "product_name": {
                     "type": "string"

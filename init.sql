@@ -12,12 +12,12 @@ CREATE TABLE IF NOT EXISTS Users (
 );
 
 CREATE TABLE IF NOT EXISTS Products (
-  product_id INT PRIMARY KEY,
+  product_id INT PRIMARY KEY AUTO_INCREMENT,
   product_name VARCHAR(255),
   product_description TEXT,
-  product_images JSON,
+  product_images TEXT,
   product_price DECIMAL(10, 2),
-  compressed_product_images JSON,
+  compressed_product_images TEXT,
   created_at DATETIME,
   updated_at DATETIME
 );

@@ -4,7 +4,9 @@ definitions:
       product_description:
         type: string
       product_images:
-        type: string
+        items:
+          type: string
+        type: array
       product_name:
         type: string
       product_price:

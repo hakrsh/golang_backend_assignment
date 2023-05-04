@@ -7,7 +7,8 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
-    network_mode: host
+    ports:
+      - 3306:3306
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
@@ -15,4 +16,6 @@ services:
     image: rabbitmq:3-management
     container_name: rabbitmq
     restart: on-failure
-    network_mode: host
+    ports:
+      - 5672:5672
+      - 15672:15672
