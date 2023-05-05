@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -26,23 +27,24 @@ func main() {
 	}
 	defer db.Close()
 
-	// Connect to the message queue
+	queue := os.Getenv("RM_QUEUENAME")
 	conn, err := msgqueue.NewRMQ()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	ch, err := conn.Channel()
+	defer conn.Close()
+	ch, err := msgqueue.NewChannel(conn)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 	defer ch.Close()
+	go msgqueue.Consumer(ch, queue)
 
 	// Create the Fiber app
 	app := fiber.New()
 
 	// Define the route to receive the product data
-	app.Post("/products", handlers.SaveProduct(db, ch))
+	app.Post("/products", handlers.SaveProduct(db, ch, queue))
 	app.Get("/swagger/*", swagger.HandlerDefault)
 	// Start the server
 	if err := app.Listen(":3000"); err != nil {

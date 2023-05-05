@@ -29,5 +29,6 @@ func NewDB() (*sql.DB, error) {
 		fmt.Println("Error connecting to the database: ", err)
 		return nil, err
 	}
+	fmt.Println("Successfully connected to the database")
 	return db, nil
 }
