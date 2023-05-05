@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/golang_backend_assignment/consumer/db"
+	"github.com/golang_backend_assignment/consumer/database"
 	"github.com/golang_backend_assignment/consumer/msgqueue"
 	"github.com/joho/godotenv"
 )
@@ -16,7 +16,7 @@ func main() {
 		fmt.Println("Error loading .env file")
 	}
 	// Connect to the database
-	db, err := db.NewDB()
+	db, err := database.NewDB()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,5 +33,6 @@ func main() {
 		log.Fatal(err)
 	}
 	defer ch.Close()
-	msgqueue.Consumer(ch, queue)
+	image_quality := 60
+	msgqueue.Consumer(ch, queue, db, image_quality)
 }

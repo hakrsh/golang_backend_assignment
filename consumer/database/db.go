@@ -1,9 +1,10 @@
-package db
+package database
 
 import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -31,4 +32,24 @@ func NewDB() (*sql.DB, error) {
 	}
 	fmt.Println("Successfully connected to the database")
 	return db, nil
+}
+
+func GetProductImages(product_id int, db *sql.DB) ([]string, error) {
+	fmt.Print("Getting product images for product_id: ", product_id)
+	stmt, err := db.Prepare("SELECT product_images FROM Products WHERE product_id = ?")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	// Execute the SELECT statement
+	var product_images string
+	err = stmt.QueryRow(product_id).Scan(&product_images)
+	if err != nil {
+		return nil, err
+	}
+
+	// Split the comma-separated values and return them as a slice of strings
+	images := strings.Split(product_images, ",")
+	return images, nil
 }

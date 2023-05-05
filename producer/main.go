@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/gofiber/swagger"
-	"github.com/golang_backend_assignment/producer/db"
+	"github.com/golang_backend_assignment/producer/database"
 	_ "github.com/golang_backend_assignment/producer/docs"
 	"github.com/golang_backend_assignment/producer/handlers"
 	"github.com/golang_backend_assignment/producer/msgqueue"
@@ -21,7 +21,7 @@ func main() {
 		fmt.Println("Error loading .env file")
 	}
 	// Connect to the database
-	db, err := db.NewDB()
+	db, err := database.NewDB()
 	if err != nil {
 		log.Fatal(err)
 	}

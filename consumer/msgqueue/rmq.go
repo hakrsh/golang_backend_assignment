@@ -1,10 +1,14 @@
 package msgqueue
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
+	"github.com/golang_backend_assignment/consumer/database"
+	"github.com/golang_backend_assignment/consumer/imageutils"
 	"github.com/streadway/amqp"
 )
 
@@ -36,7 +40,7 @@ func NewChannel(conn *amqp.Connection) (*amqp.Channel, error) {
 	return ch, nil
 }
 
-func Consumer(ch *amqp.Channel, queue string) {
+func Consumer(ch *amqp.Channel, queue string, db *sql.DB, image_quality int) {
 	msgs, _ := ch.Consume(
 		queue,
 		"",
@@ -51,7 +55,23 @@ func Consumer(ch *amqp.Channel, queue string) {
 	go func() {
 		fmt.Println("Listening for messages on queue: ", queue)
 		for d := range msgs {
-			fmt.Println("Received message: ", string(d.Body))
+			product_id_str := string(d.Body)
+			fmt.Println("Received message: ", product_id_str)
+			product_id, err := strconv.Atoi(product_id_str)
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+			image_urls, err := database.GetProductImages(product_id, db)
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+			err = imageutils.DownloadResizeCompressSaveImages(image_urls, image_quality, product_id_str)
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
 		}
 	}()
 
