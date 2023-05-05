@@ -40,6 +40,10 @@ paths:
           description: Invalid request payload
           schema:
             type: string
+        "404":
+          description: User not found
+          schema:
+            type: string
         "500":
           description: Internal server error
           schema:

@@ -1,4 +1,4 @@
-module github.com/golang_backend_assignment
+module github.com/golang_backend_assignment/producer
 
 go 1.19
 

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang_backend_assignment/msgqueue"
+	"github.com/golang_backend_assignment/producer/msgqueue"
 	"github.com/streadway/amqp"
 )
 

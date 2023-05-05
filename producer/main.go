@@ -8,10 +8,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/gofiber/swagger"
-	"github.com/golang_backend_assignment/db"
-	_ "github.com/golang_backend_assignment/docs"
-	"github.com/golang_backend_assignment/handlers"
-	"github.com/golang_backend_assignment/msgqueue"
+	"github.com/golang_backend_assignment/producer/db"
+	_ "github.com/golang_backend_assignment/producer/docs"
+	"github.com/golang_backend_assignment/producer/handlers"
+	"github.com/golang_backend_assignment/producer/msgqueue"
 	"github.com/joho/godotenv"
 )
 
@@ -38,7 +38,6 @@ func main() {
 		log.Fatal(err)
 	}
 	defer ch.Close()
-	go msgqueue.Consumer(ch, queue)
 
 	// Create the Fiber app
 	app := fiber.New()
