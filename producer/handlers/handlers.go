@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang_backend_assignment/producer/database"
 	"github.com/golang_backend_assignment/producer/msgqueue"
 	"github.com/streadway/amqp"
 )
@@ -35,46 +36,12 @@ func SaveProduct(db *sql.DB, ch *amqp.Channel, queue string) fiber.Handler {
 			return fiber.NewError(fiber.StatusBadRequest, "Invalid request payload")
 		}
 
-		// Check if the UserID exists in the Users table
-		userStmt, err := db.Prepare("SELECT COUNT(*) FROM Users WHERE id = ?")
+		err := database.UserExists(db, product.UserID)
 		if err != nil {
-			return err
-		}
-		defer userStmt.Close()
-
-		var count int
-		err = userStmt.QueryRow(product.UserID).Scan(&count)
-		if err != nil {
-			return err
-		}
-		if count == 0 {
 			return fiber.NewError(fiber.StatusNotFound, "User not found")
 		}
 
-		// Convert the product images slice to a comma-separated string
-		productImagesStr := ""
-		for _, image := range product.ProductImages {
-			productImagesStr += image + ","
-		}
-		productImagesStr = productImagesStr[:len(productImagesStr)-1]
-
-		// Insert the product into the database
-		stmt, err := db.Prepare("INSERT INTO Products (product_name, product_description, product_images, product_price, created_at) VALUES (?, ?, ?, ?, NOW())")
-		if err != nil {
-			return err
-		}
-		defer stmt.Close()
-
-		res, err := stmt.Exec(product.ProductName, product.ProductDescription, productImagesStr, product.ProductPrice)
-		if err != nil {
-			return err
-		}
-
-		// Get the product ID
-		productID, err := res.LastInsertId()
-		if err != nil {
-			return err
-		}
+		productID, err := database.InsertProduct(db, product.ProductName, product.ProductDescription, product.ProductPrice, product.ProductImages)
 		err = msgqueue.Producer(productID, ch, queue)
 		if err != nil {
 			return err

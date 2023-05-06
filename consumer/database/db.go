@@ -53,3 +53,21 @@ func GetProductImages(product_id int, db *sql.DB) ([]string, error) {
 	images := strings.Split(product_images, ",")
 	return images, nil
 }
+
+func UpdateProductImages(db *sql.DB, productID int, compressedImagesPaths []string) error {
+	// Update the database
+	compressedImages := strings.Join(compressedImagesPaths, ",")
+	query := "UPDATE Products SET compressed_product_images = ?, updated_at = NOW() WHERE product_id = ?"
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return fmt.Errorf("error preparing update statement: %v", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(compressedImages, productID)
+	if err != nil {
+		return fmt.Errorf("error executing update statement: %v", err)
+	}
+
+	return nil
+}
