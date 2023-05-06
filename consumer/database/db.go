@@ -35,7 +35,7 @@ func NewDB() (*sql.DB, error) {
 }
 
 func GetProductImages(product_id int, db *sql.DB) ([]string, error) {
-	fmt.Print("Getting product images for product_id: ", product_id)
+	fmt.Println("Getting product images for product_id: ", product_id)
 	stmt, err := db.Prepare("SELECT product_images FROM Products WHERE product_id = ?")
 	if err != nil {
 		return nil, err

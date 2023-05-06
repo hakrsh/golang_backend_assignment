@@ -68,25 +68,3 @@ func Producer(productID int64, ch *amqp.Channel, queue string) error {
 	fmt.Println("Successfully Published Message to Queue")
 	return err
 }
-
-func Consumer(ch *amqp.Channel, queue string) {
-	msgs, _ := ch.Consume(
-		queue,
-		"",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-
-	forever := make(chan bool)
-	go func() {
-		fmt.Println("Listening for messages on queue: ", queue)
-		for d := range msgs {
-			fmt.Println("Received message: ", string(d.Body))
-		}
-	}()
-
-	<-forever
-}
