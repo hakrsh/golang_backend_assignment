@@ -67,7 +67,12 @@ func Consumer(ch *amqp.Channel, queue string, db *sql.DB, image_quality int) {
 				log.Fatal(err)
 				return
 			}
-			err = imageutils.DownloadResizeCompressSaveImages(image_urls, image_quality, product_id_str)
+			err, compressedImagePaths := imageutils.DownloadResizeCompressSaveImages(image_urls, image_quality, product_id_str)
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+			err = database.UpdateProductImages(db, product_id, compressedImagePaths)
 			if err != nil {
 				log.Fatal(err)
 				return

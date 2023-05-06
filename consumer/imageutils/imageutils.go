@@ -42,29 +42,30 @@ func CompressImage(img image.Image, quality int) ([]byte, error) {
 	return []byte(buf.String()), nil
 }
 
-func SaveImage(filename string, data []byte, dir string) error {
+func SaveImage(filename string, data []byte, dir string) (error, string) {
 	err := os.MkdirAll(dir, os.ModePerm)
 	if err != nil {
-		return err
+		return err, ""
 	}
 	filepath := filepath.Join(dir, filename)
 	f, err := os.Create(filepath)
 	if err != nil {
-		return err
+		return err, ""
 	}
 	defer f.Close()
 
 	_, err = io.Copy(f, strings.NewReader(string(data)))
 	if err != nil {
-		return err
+		return err, ""
 	}
 
 	logrus.Infof("Image saved to file %s", filename)
 
-	return nil
+	return nil, filepath
 }
 
-func DownloadResizeCompressSaveImages(urls []string, quality int, product_id string) error {
+func DownloadResizeCompressSaveImages(urls []string, quality int, product_id string) (error, []string) {
+	paths := []string{}
 	for _, url := range urls {
 		img, err := DownloadImage(url)
 		if err != nil {
@@ -85,12 +86,13 @@ func DownloadResizeCompressSaveImages(urls []string, quality int, product_id str
 		}
 
 		filename := filepath.Base(url)
-		err = SaveImage(filename, imgCompressed, "product_imgs/"+product_id+"/")
+		err, path := SaveImage(filename, imgCompressed, "product_imgs/"+product_id+"/")
 		if err != nil {
 			logrus.Errorf("Failed to save image: %s", err)
 			continue
 		}
+		paths = append(paths, path)
 	}
 
-	return nil
+	return nil, paths
 }
