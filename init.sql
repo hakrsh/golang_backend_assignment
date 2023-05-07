@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS ProductsAndUsersDB;
-USE ProductsAndUsersDB;
+CREATE DATABASE IF NOT EXISTS product_catalog_db;
+USE product_catalog_db;
 
 CREATE TABLE IF NOT EXISTS Users (
   id INT PRIMARY KEY,

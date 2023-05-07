@@ -56,6 +56,9 @@ func GetProductImages(product_id int, db *sql.DB) ([]string, error) {
 
 func UpdateProductImages(db *sql.DB, productID int, compressedImagesPaths []string) error {
 	// Update the database
+	if len(compressedImagesPaths) == 0 {
+		return fmt.Errorf("no images to update")
+	}
 	compressedImages := strings.Join(compressedImagesPaths, ",")
 	query := "UPDATE Products SET compressed_product_images = ?, updated_at = NOW() WHERE product_id = ?"
 	stmt, err := db.Prepare(query)

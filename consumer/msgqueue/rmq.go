@@ -59,23 +59,23 @@ func Consumer(ch *amqp.Channel, queue string, db *sql.DB, image_quality int) {
 			fmt.Println("Received message: ", product_id_str)
 			product_id, err := strconv.Atoi(product_id_str)
 			if err != nil {
-				log.Fatal(err)
-				return
+				log.Println(err)
+				continue
 			}
 			image_urls, err := database.GetProductImages(product_id, db)
 			if err != nil {
-				log.Fatal(err)
-				return
+				log.Println(err)
+				continue
 			}
 			err, compressedImagePaths := imageutils.DownloadResizeCompressSaveImages(image_urls, image_quality, product_id_str)
 			if err != nil {
-				log.Fatal(err)
-				return
+				log.Println(err)
+				continue
 			}
 			err = database.UpdateProductImages(db, product_id, compressedImagePaths)
 			if err != nil {
-				log.Fatal(err)
-				return
+				log.Println(err)
+				continue
 			}
 		}
 	}()

@@ -14,7 +14,7 @@ func TestNewDB(t *testing.T) {
 	os.Setenv("DB_PASSWORD", "example")
 	os.Setenv("DB_HOST", "localhost")
 	os.Setenv("DB_PORT", "3306")
-	os.Setenv("DB_NAME", "ProductsAndUsersDB")
+	os.Setenv("DB_NAME", "product_catalog_db")
 
 	// Call NewDB function and check if there is an error
 	db, err := NewDB()
