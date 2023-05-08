@@ -41,6 +41,18 @@ func NewChannel(conn *amqp.Connection) (*amqp.Channel, error) {
 }
 
 func Consumer(ch *amqp.Channel, queue string, db *sql.DB, image_quality int) {
+	_, err := ch.QueueDeclare(
+		queue, // queue name
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+	if err != nil {
+		logrus.Errorf("Failed to declare queue: %v", err)
+		return
+	}
 	msgs, _ := ch.Consume(
 		queue,
 		"",

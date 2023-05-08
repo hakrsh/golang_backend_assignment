@@ -39,12 +39,12 @@ func NewChannel(conn *amqp.Connection) (*amqp.Channel, error) {
 // Take an integer productID and a string queue name and rmq channel as arguments and publish the productID to the queue
 func Producer(productID int64, ch *amqp.Channel, queue string) error {
 	_, err := ch.QueueDeclare(
-		queue,
-		false,
-		false,
-		false,
-		false,
-		nil,
+		queue, // queue name
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
 	)
 
 	if err != nil {
