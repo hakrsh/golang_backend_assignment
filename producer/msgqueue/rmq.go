@@ -2,9 +2,9 @@ package msgqueue
 
 import (
 	"fmt"
-	"log"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
 
@@ -18,10 +18,10 @@ func NewRMQ() (*amqp.Connection, error) {
 	rmqURL := fmt.Sprintf("amqp://%s:%s@%s:%s/", rmqUser, rmqPassword, rmqHost, rmqPort)
 	conn, err := amqp.Dial(rmqURL)
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
-		return nil, fmt.Errorf("failed to connect to RabbitMQ: %v", err)
+		logrus.Fatalf("Failed to connect to RabbitMQ: %v", err)
+		return nil, err
 	}
-	fmt.Println("Successfully Connected to RabbitMQ Instance")
+	logrus.Info("Successfully Connected to RabbitMQ Instance")
 	return conn, nil
 }
 
@@ -29,10 +29,10 @@ func NewRMQ() (*amqp.Connection, error) {
 func NewChannel(conn *amqp.Connection) (*amqp.Channel, error) {
 	ch, err := conn.Channel()
 	if err != nil {
-		log.Fatalf("Failed to open a channel: %v", err)
-		return nil, fmt.Errorf("failed to open a channel: %v", err)
+		logrus.Fatalf("Failed to open a channel: %v", err)
+		return nil, err
 	}
-	fmt.Println("Successfully Created a Channel")
+	logrus.Info("Successfully Created a Channel")
 	return ch, nil
 }
 
@@ -48,7 +48,8 @@ func Producer(productID int64, ch *amqp.Channel, queue string) error {
 	)
 
 	if err != nil {
-		fmt.Println(err)
+		logrus.Errorf("Failed to declare a queue: %v", err)
+		return err
 	}
 
 	err = ch.Publish(
@@ -63,8 +64,9 @@ func Producer(productID int64, ch *amqp.Channel, queue string) error {
 	)
 
 	if err != nil {
-		fmt.Println(err)
+		logrus.Errorf("Failed to publish a message: %v", err)
+		return err
 	}
-	fmt.Println("Successfully Published Message to Queue")
+	logrus.Infof("Successfully published productID: %d to queue: %s", productID, queue)
 	return err
 }

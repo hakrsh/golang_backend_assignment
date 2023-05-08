@@ -93,6 +93,6 @@ func DownloadResizeCompressSaveImages(urls []string, quality int, product_id str
 		}
 		paths = append(paths, path)
 	}
-
+	logrus.Infof("Successfully downloaded, resized, compressed and saved %d images", len(paths))
 	return nil, paths
 }

@@ -3,9 +3,10 @@ package handlers
 import (
 	"database/sql"
 
-	"github.com/gofiber/fiber/v2"
+	fiber "github.com/gofiber/fiber/v2"
 	"github.com/golang_backend_assignment/producer/database"
 	"github.com/golang_backend_assignment/producer/msgqueue"
+	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
 
@@ -33,18 +34,30 @@ func SaveProduct(db *sql.DB, ch *amqp.Channel, queue string) fiber.Handler {
 		// Parse the request body into a Product struct
 		var product Product
 		if err := c.BodyParser(&product); err != nil {
+			logrus.Errorf("Error in parsing the request body: %v", err)
 			return fiber.NewError(fiber.StatusBadRequest, "Invalid request payload")
 		}
 
 		err := database.UserExists(db, product.UserID)
 		if err != nil {
-			return fiber.NewError(fiber.StatusNotFound, "User not found")
+			if err == sql.ErrNoRows {
+				logrus.Errorf("User not found: %v", err)
+				return fiber.NewError(fiber.StatusNotFound, "User not found")
+			} else {
+				logrus.Errorf("Error in checking if user exists: %v", err)
+				return fiber.NewError(fiber.StatusInternalServerError, "Internal server error")
+			}
 		}
 
 		productID, err := database.InsertProduct(db, product.ProductName, product.ProductDescription, product.ProductPrice, product.ProductImages)
+		if err != nil {
+			logrus.Errorf("Error in inserting product: %v", err)
+			return fiber.NewError(fiber.StatusInternalServerError, "Internal server error")
+		}
 		err = msgqueue.Producer(productID, ch, queue)
 		if err != nil {
-			return err
+			logrus.Errorf("Error in sending message to queue: %v", err)
+			return fiber.NewError(fiber.StatusInternalServerError, "Internal server error")
 		}
 		// Return a success message
 		return c.SendString("Product saved successfully")

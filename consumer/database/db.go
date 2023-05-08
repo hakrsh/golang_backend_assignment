@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/sirupsen/logrus"
 )
 
 func NewDB() (*sql.DB, error) {
@@ -27,15 +28,15 @@ func NewDB() (*sql.DB, error) {
 	}
 	err = db.Ping()
 	if err != nil {
-		fmt.Println("Error connecting to the database: ", err)
+		logrus.Errorf("Error connecting to the database: ", err)
 		return nil, err
 	}
-	fmt.Println("Successfully connected to the database")
+	logrus.Info("Successfully connected to the database")
 	return db, nil
 }
 
 func GetProductImages(product_id int, db *sql.DB) ([]string, error) {
-	fmt.Println("Getting product images for product_id: ", product_id)
+	logrus.Info("Getting product images for product_id: ", product_id)
 	stmt, err := db.Prepare("SELECT product_images FROM Products WHERE product_id = ?")
 	if err != nil {
 		return nil, err
@@ -57,20 +58,23 @@ func GetProductImages(product_id int, db *sql.DB) ([]string, error) {
 func UpdateProductImages(db *sql.DB, productID int, compressedImagesPaths []string) error {
 	// Update the database
 	if len(compressedImagesPaths) == 0 {
-		return fmt.Errorf("no images to update")
+		logrus.Error("No images to update")
+		return nil
 	}
 	compressedImages := strings.Join(compressedImagesPaths, ",")
 	query := "UPDATE Products SET compressed_product_images = ?, updated_at = NOW() WHERE product_id = ?"
 	stmt, err := db.Prepare(query)
 	if err != nil {
-		return fmt.Errorf("error preparing update statement: %v", err)
+		logrus.Errorf("error preparing update statement: %v", err)
+		return err
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(compressedImages, productID)
 	if err != nil {
-		return fmt.Errorf("error executing update statement: %v", err)
+		logrus.Errorf("error executing update statement: %v", err)
+		return err
 	}
-
+	logrus.Infof("Successfully updated product_id: %d", productID)
 	return nil
 }
