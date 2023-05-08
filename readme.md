@@ -101,6 +101,24 @@ Note: This assumes that you have Docker and Docker Compose installed on your sys
 Producer and Consumer runnnig in two terminals
 ![Producer and Consumer](./images/pc.jpg "Producer and Consumer runnnig in two terminals")
 
+## Testing
+Instructions for testing the producer and consumer components of the codebase using unit tests and integration tests:
+
+Unit Testing:
+1. Open a terminal window and navigate to the "producer" directory of the codebase using the `cd` command.
+2. Run the command `go test ./...` to execute all the unit tests for the producer component.
+3. Open another terminal window and navigate to the "consumer" directory of the codebase using the `cd` command.
+4. Run the command `go test ./...` to execute all the unit tests for the consumer component.
+
+Integration Testing:
+1. Open a terminal window and navigate to the root directory of the codebase. `golang_backend_assignment`
+2. Make the `integration_test.sh` script executable by running the command `chmod +x integration_test.sh`.
+3. Run the integration tests by running the command `./integration_test.sh` in the terminal window.
+4. The integration tests will execute the producer and consumer components and verify that messages are correctly produced, consumed, and processed.
+
+Note: Make sure that all the dependencies required for testing are installed on your system. Also, ensure that the environment variables required for running the codebase are set correctly before running the tests.
+
+
 ## Dev Notes
 ### Installing Go
 1. Visit the official Go downloads page at https://golang.org/dl/

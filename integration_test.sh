@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Start containers using docker-compose
 echo "Starting containers using docker-compose..."
@@ -59,3 +60,4 @@ echo "Stopped the process listening to port 3000."
 echo "Stopping containers using docker-compose..."
 docker-compose down -v
 echo "Stopped containers using docker-compose."
+echo "Integration test completed successfully."
