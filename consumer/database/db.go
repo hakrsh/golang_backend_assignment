@@ -28,7 +28,7 @@ func NewDB() (*sql.DB, error) {
 	}
 	err = db.Ping()
 	if err != nil {
-		logrus.Errorf("Error connecting to the database: ", err)
+		logrus.Errorf("Error connecting to the database: %v", err)
 		return nil, err
 	}
 	logrus.Info("Successfully connected to the database")

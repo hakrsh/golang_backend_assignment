@@ -24,12 +24,12 @@ func NewDB() (*sql.DB, error) {
 	// Connect to the database
 	db, err := sql.Open("mysql", dbURL)
 	if err != nil {
-		logrus.Errorf("Error connecting to the database: ", err)
+		logrus.Errorf("Error connecting to the database: %v", err)
 		return nil, err
 	}
 	err = db.Ping()
 	if err != nil {
-		logrus.Errorf("Error connecting to the database: ", err)
+		logrus.Errorf("Error connecting to the database: %v", err)
 		return nil, err
 	}
 	logrus.Info("Successfully connected to the database")
@@ -40,7 +40,7 @@ func UserExists(db *sql.DB, userID int) error {
 	logrus.Info("Checking if user exists for user_id: ", userID)
 	userStmt, err := db.Prepare("SELECT COUNT(*) FROM Users WHERE id = ?")
 	if err != nil {
-		logrus.Errorf("Error preparing SQL statement: ", err)
+		logrus.Errorf("Error preparing SQL statement: %v", err)
 		return err
 	}
 	defer userStmt.Close()
@@ -48,7 +48,7 @@ func UserExists(db *sql.DB, userID int) error {
 	var count int
 	err = userStmt.QueryRow(userID).Scan(&count)
 	if err != nil {
-		logrus.Errorf("Error executing SQL statement: ", err)
+		logrus.Errorf("Error executing SQL statement: %v", err)
 		return err
 	}
 	if count == 0 {
@@ -64,21 +64,21 @@ func InsertProduct(db *sql.DB, ProductName string, ProductDescription string, Pr
 	// Insert the product into the database
 	stmt, err := db.Prepare("INSERT INTO Products (product_name, product_description, product_images, product_price, created_at) VALUES (?, ?, ?, ?, NOW())")
 	if err != nil {
-		logrus.Errorf("Error preparing SQL statement: ", err)
+		logrus.Errorf("Error preparing SQL statement: %v", err)
 		return 0, err
 	}
 	defer stmt.Close()
 
 	res, err := stmt.Exec(ProductName, ProductDescription, productImagesStr, ProductPrice)
 	if err != nil {
-		logrus.Errorf("Error executing SQL statement: ", err)
+		logrus.Errorf("Error executing SQL statement: %v", err)
 		return 0, err
 	}
 
 	// Get the product ID
 	productID, err := res.LastInsertId()
 	if err != nil {
-		logrus.Errorf("Error getting last insert ID: ", err)
+		logrus.Errorf("Error getting last insert ID: %v", err)
 		return 0, err
 	}
 	logrus.Infof("Successfully inserted product into the database with ID: %d", productID)
