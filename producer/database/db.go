@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/sirupsen/logrus"
@@ -62,14 +63,15 @@ func InsertProduct(db *sql.DB, ProductName string, ProductDescription string, Pr
 	productImagesStr := strings.Join(productImages, ",")
 
 	// Insert the product into the database
-	stmt, err := db.Prepare("INSERT INTO Products (product_name, product_description, product_images, product_price, created_at) VALUES (?, ?, ?, ?, NOW())")
+	currentTime := time.Now().Format("2006-01-02 15:04:05")
+	stmt, err := db.Prepare("INSERT INTO Products (product_name, product_description, product_images, product_price, created_at) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
 		logrus.Errorf("Error preparing SQL statement: %v", err)
 		return 0, err
 	}
 	defer stmt.Close()
 
-	res, err := stmt.Exec(ProductName, ProductDescription, productImagesStr, ProductPrice)
+	res, err := stmt.Exec(ProductName, ProductDescription, productImagesStr, ProductPrice, currentTime)
 	if err != nil {
 		logrus.Errorf("Error executing SQL statement: %v", err)
 		return 0, err

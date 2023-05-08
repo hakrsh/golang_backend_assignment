@@ -3,32 +3,9 @@ package database
 import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
-	"os"
 	"reflect"
 	"testing"
 )
-
-func TestNewDB(t *testing.T) {
-	// Set up environment variables for test database
-	os.Setenv("DB_USER", "root")
-	os.Setenv("DB_PASSWORD", "example")
-	os.Setenv("DB_HOST", "localhost")
-	os.Setenv("DB_PORT", "3306")
-	os.Setenv("DB_NAME", "product_catalog_db")
-
-	// Call NewDB function and check if there is an error
-	db, err := NewDB()
-	if err != nil {
-		t.Errorf("NewDB returned an error: %v", err)
-	}
-	defer db.Close()
-
-	// Check if the connection is alive
-	err = db.Ping()
-	if err != nil {
-		t.Errorf("Could not establish a connection to the database: %v", err)
-	}
-}
 
 func TestGetProductImages(t *testing.T) {
 	// Open a test database connection
@@ -61,5 +38,85 @@ func TestGetProductImages(t *testing.T) {
 	expected := []string{"image1.jpg", "image2.jpg", "image3.jpg"}
 	if !reflect.DeepEqual(images, expected) {
 		t.Errorf("Unexpected result: got %v, expected %v", images, expected)
+	}
+	// Call the GetProductImages function with product_id = 999
+	images, err = GetProductImages(999, db)
+	if err == nil {
+		t.Errorf("Expected an error, but got nil")
+	}
+
+}
+
+func TestUpdateProductImages(t *testing.T) {
+	// Set up a test database
+	testDB, err := sql.Open("sqlite3", ":memory:")
+	if err != nil {
+		t.Fatalf("Error opening test database: %v", err)
+	}
+	defer testDB.Close()
+
+	// Create the Products table
+	_, err = testDB.Exec(`
+		CREATE TABLE Products (
+			product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			product_name TEXT,
+			product_description TEXT,
+			product_images TEXT,
+			compressed_product_images TEXT,
+			product_price REAL,
+			created_at TIMESTAMP,
+			updated_at TIMESTAMP
+		)
+	`)
+	if err != nil {
+		t.Fatalf("Error creating Products table: %v", err)
+	}
+
+	// Insert a test product
+	_, err = testDB.Exec(`
+		INSERT INTO Products (product_name, product_description, product_images, product_price, created_at)
+		VALUES ('Test Product', 'This is a test product.', 'image1.jpg', 19.99, datetime('now'))
+	`)
+	if err != nil {
+		t.Fatalf("Error inserting test product: %v", err)
+	}
+
+	// Update the product images
+	productID := 1
+	err = UpdateProductImages(testDB, productID, []string{"image1.jpg", "image2.jpg"})
+	if err != nil {
+		t.Fatalf("Error updating product images: %v", err)
+	}
+
+	// Check that the images were updated correctly
+	var compressedImages string
+	err = testDB.QueryRow("SELECT compressed_product_images FROM Products WHERE product_id = ?", productID).Scan(&compressedImages)
+	if err != nil {
+		t.Fatalf("Error getting compressed product images: %v", err)
+	}
+	expectedImages := "image1.jpg,image2.jpg"
+	if compressedImages != expectedImages {
+		t.Fatalf("Expected compressed images to be %q, but got %q", expectedImages, compressedImages)
+	}
+
+	// Update the product images again, this time with an empty list
+	err = UpdateProductImages(testDB, productID, []string{})
+	if err != nil {
+		t.Fatalf("Error updating product images: %v", err)
+	}
+
+	// Check that the images were not updated
+	err = testDB.QueryRow("SELECT compressed_product_images FROM Products WHERE product_id = ?", productID).Scan(&compressedImages)
+	if err != nil {
+		t.Fatalf("Error getting compressed product images: %v", err)
+	}
+	if compressedImages != expectedImages {
+		t.Fatalf("Expected compressed images to be %q, but got %q", expectedImages, compressedImages)
+	}
+
+	// Update a nonexistent product ID
+	err = UpdateProductImages(testDB, 999, []string{"image3.jpg"})
+	if err == nil {
+		t.Fatal("Expected error updating nonexistent product, but got nil")
 	}
 }

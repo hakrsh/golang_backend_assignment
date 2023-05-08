@@ -8,6 +8,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.44.0
 	github.com/gofiber/swagger v0.1.11
 	github.com/joho/godotenv v1.5.1
+	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/sirupsen/logrus v1.9.0
 	github.com/streadway/amqp v1.0.0
 	github.com/swaggo/swag v1.16.1
