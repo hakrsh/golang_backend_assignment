@@ -98,7 +98,7 @@ Note: This assumes that you have Docker and Docker Compose installed on your sys
 <hr/>
 
 ## Screenshots
-Producer and Consumer runnnig in two terminals
+Producer and Consumer runnnig in two terminals <br>
 ![Producer and Consumer](./images/pc.jpg "Producer and Consumer runnnig in two terminals")
 
 ## Testing
